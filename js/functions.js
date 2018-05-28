@@ -40,21 +40,16 @@ module.exports = {
     });
   },
 
-  converse:function(sheet, filter, isEmpty, callback){
+  converse:function(sheet, callback){
     var resultArray = sheet.data;
-    if(!isEmpty(resultArray,0)){
-      resultArray = filter(resultArray, 0, 'Benelux');
-    }
-    if(!isEmpty(resultArray,1)){
-      resultArray = filter(resultArray, 1, '0007');
-    }
-    if(!isEmpty(resultArray,2)){
-      resultArray = filter(resultArray, 2, 'WHAT');
-    }
+
+    resultArray = callback(resultArray, 0 , 'Germany');
+    resultArray = callback(resultArray, 1 , '0300');
+    resultArray = callback(resultArray, 2 , 'WHAT');
 
     return resultArray;
   },
-  
+
   constructAnswer:function(array){
     var firstRow = array[0];
         answer = '';

@@ -27,6 +27,7 @@ module.exports = {
     }
     return newArray;
   },
+
   prompt:function(question, callback) {
     var stdin = process.stdin,
         stdout = process.stdout;
@@ -38,11 +39,9 @@ module.exports = {
         callback(data.toString().trim());
     });
   },
-  converse:function(sheet, filter, isEmpty, callback){
-    var firstRow = sheet.data[0];
-        resultArray = sheet.data,
-        answer = '';
 
+  converse:function(sheet, filter, isEmpty, callback){
+    var resultArray = sheet.data;
     if(!isEmpty(resultArray,0)){
       resultArray = filter(resultArray, 0, 'Benelux');
     }
@@ -52,15 +51,21 @@ module.exports = {
     if(!isEmpty(resultArray,2)){
       resultArray = filter(resultArray, 2, 'WHAT');
     }
-    console.log(resultArray);
+
+    return resultArray;
+  },
+  
+  constructAnswer:function(array){
+    var firstRow = array[0];
+        answer = '';
     for(var counter = 0 ; counter < firstRow.length; counter++){
       if(firstRow[counter] === 'Answer'){
-        for(var counter2 = 1 ; counter2 < resultArray.length; counter2++){
+        for(var counter2 = 1 ; counter2 < array.length; counter2++){
           if(answer == ''){
-            answer = resultArray[counter2][counter];
+            answer = array[counter2][counter];
           }
           else{
-            answer = answer + " or " + resultArray[counter2][counter]
+            answer = answer + " or " + array[counter2][counter]
           }
         }
         return answer;

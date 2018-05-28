@@ -19,14 +19,12 @@ module.exports = {
   },
 
   filter:function(twoDimentionArrayToBeFiltered, index, criteria){
-    var newArray = [];
-    console.log("find " + criteria);
-    for( var counter = 0 ; counter < twoDimentionArrayToBeFiltered.length ; counter++ ){
+    var newArray = [twoDimentionArrayToBeFiltered[0]];
+    for( var counter = 1 ; counter < twoDimentionArrayToBeFiltered.length ; counter++ ){
       if(twoDimentionArrayToBeFiltered[counter][index] === criteria){
         newArray.push(twoDimentionArrayToBeFiltered[counter]);
       }
     }
-    console.log("found " + criteria);
     return newArray;
   },
   prompt:function(question, callback) {
@@ -40,25 +38,32 @@ module.exports = {
         callback(data.toString().trim());
     });
   },
-  converse:function(sheet, filter, callback){
+  converse:function(sheet, filter, isEmpty, callback){
     var firstRow = sheet.data[0];
-        resultArray = [],
-        answer = null;
+        resultArray = sheet.data,
+        answer = '';
 
-    resultArray = filter(sheet.data, 0, 'Benelux');
-    resultArray = filter(sheet.data, 1, '0007');
-
+    if(!isEmpty(resultArray,0)){
+      resultArray = filter(resultArray, 0, 'Benelux');
+    }
+    if(!isEmpty(resultArray,1)){
+      resultArray = filter(resultArray, 1, '0007');
+    }
+    if(!isEmpty(resultArray,2)){
+      resultArray = filter(resultArray, 2, 'WHAT');
+    }
+    console.log(resultArray);
     for(var counter = 0 ; counter < firstRow.length; counter++){
       if(firstRow[counter] === 'Answer'){
-        for(var counter2 = 0 ; counter2 < resultArray.length; counter2++){
-          if(answer == null){
+        for(var counter2 = 1 ; counter2 < resultArray.length; counter2++){
+          if(answer == ''){
             answer = resultArray[counter2][counter];
           }
           else{
             answer = answer + " or " + resultArray[counter2][counter]
           }
         }
-        console.log(answer);
+        return answer;
       }
     }
   }

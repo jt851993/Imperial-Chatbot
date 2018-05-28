@@ -25,7 +25,8 @@ functions.prompt('Hello what is your question?\n', function (input) {
                           else{
                             var json = JSON.parse(response.output.text[0]);
                             var sheet = functions.getSheet(sheetArray,json.type);
-                            functions.converse(sheet,functions.filter, null);
+                            var answer = functions.converse(sheet,functions.filter,functions.isAllEmpty, null);
+                            console.log(answer);
                           }
                           process.exit();
                         }

@@ -1,13 +1,16 @@
 require('dotenv').config({silent: true});
 
 var watson = require('./WatsonAssistant');
-var readline = require('readline');
 var functions = require('./js/functions');
 var xlsx = require('node-xlsx');
 
 async function main(){
   var userInput = await functions.askQuestion('Hello what is your question?\n');
   var intent = await watson.getIntent(userInput);
+  if(intent === "undefined"){
+    console.log("Did not understand question");
+    process.exit();
+  }
 
   var sheetArray = xlsx.parse(process.env.EXCEL_PATH);
 

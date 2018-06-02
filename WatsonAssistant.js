@@ -21,6 +21,9 @@ module.exports ={
                             if (err){
                               resolve(err);
                             }
+                            else if(response.output.nodes_visited[0] === "Anything else"){
+                              resolve("undefined");
+                            }
                             else{
                               resolve(JSON.parse(response.output.text[0]).type);
                             }

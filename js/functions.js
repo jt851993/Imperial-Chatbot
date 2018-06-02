@@ -40,7 +40,6 @@ module.exports = {
 
     resultArray = callback(resultArray, 0 , 'Germany');
     resultArray = callback(resultArray, 1 , '0300');
-    resultArray = callback(resultArray, 2 , 'WHAT');
 
     return resultArray;
   },

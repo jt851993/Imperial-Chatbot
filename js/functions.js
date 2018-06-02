@@ -1,3 +1,10 @@
+var readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
+
 module.exports = {
   getSheet:function(sheetArray, sheetName){
     for( var counter = 0 ; counter < sheetArray.length ; counter++){
@@ -28,18 +35,6 @@ module.exports = {
     return newArray;
   },
 
-  prompt:function(question, callback) {
-    var stdin = process.stdin,
-        stdout = process.stdout;
-
-    stdin.resume();
-    stdout.write(question);
-
-    stdin.once('data', function (data) {
-        callback(data.toString().trim());
-    });
-  },
-
   converse:function(sheet, callback){
     var resultArray = sheet.data;
 
@@ -48,6 +43,12 @@ module.exports = {
     resultArray = callback(resultArray, 2 , 'WHAT');
 
     return resultArray;
+  },
+
+  askQuestion:function(question) {
+    return new Promise((resolve) => {
+      rl.question(question, (name) => { resolve(name) })
+    })
   },
 
   constructAnswer:function(array){

@@ -35,13 +35,23 @@ module.exports = {
     return newArray;
   },
 
-  converse:function(sheet, callback){
-    var resultArray = sheet.data;
-
-    resultArray = callback(resultArray, 0 , 'Germany');
-    resultArray = callback(resultArray, 1 , '0300');
-
-    return resultArray;
+  converse:function(sheet, functions, callback){
+    return new Promise( async (resolve) => {
+      var resultArray = sheet.data;
+      var questions = sheet.data[0];
+      for(var counter = 0; counter < questions.length ; counter++){
+        if(!questions[counter] ){
+          continue;
+        }
+        else if( questions[counter] == 'Answer'){
+          resolve(resultArray);
+          break;
+        }
+        var answer =  await functions.askQuestion(questions[counter] + "\n");
+        resultArray = callback(resultArray, counter , answer);
+      }
+      resolve(resultArray);
+    })
   },
 
   askQuestion:function(question) {

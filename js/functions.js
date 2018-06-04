@@ -40,15 +40,17 @@ module.exports = {
       var resultArray = sheet.data;
       var questions = sheet.data[0];
       for(var counter = 0; counter < questions.length ; counter++){
-        if(!questions[counter] ){
+        if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
           continue;
         }
         else if( questions[counter] == 'Answer'){
           resolve(resultArray);
           break;
         }
-        var answer =  await functions.askQuestion(questions[counter] + "\n");
-        resultArray = callback(resultArray, counter , answer);
+        else{
+          var answer =  await functions.askQuestion("What is the "+ questions[counter] + "?\n");
+          resultArray = callback(resultArray, counter , answer);
+        }
       }
       resolve(resultArray);
     })
@@ -63,6 +65,9 @@ module.exports = {
   constructAnswer:function(array){
     var firstRow = array[0];
         answer = '';
+    if(array.length == 1){
+      return "No answer found";
+    }
     for(var counter = 0 ; counter < firstRow.length; counter++){
       if(firstRow[counter] === 'Answer'){
         for(var counter2 = 1 ; counter2 < array.length; counter2++){

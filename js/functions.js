@@ -6,10 +6,12 @@ const rl = readline.createInterface({
 })
 
 module.exports = {
-  getSheet:function(sheetArray, sheetName){
-    for( var counter = 0 ; counter < sheetArray.length ; counter++){
-      if(sheetArray[counter].name === sheetName){
-        return sheetArray[counter];
+  getSheet:function(sheetArray, intent){
+    if(intent && intent[0]){
+      for( var counter = 0 ; counter < sheetArray.length ; counter++){
+        if(sheetArray[counter].name === intent[0].intent){
+          return sheetArray[counter];
+        }
       }
     }
     return null;
@@ -35,23 +37,35 @@ module.exports = {
     return newArray;
   },
 
+  getEntityMatch:function(listOfEntity, searchString){
+    if(listOfEntity && searchString){
+      for(var counter = 0 ; counter < listOfEntity.length ; counter++ ){
+        if(listOfEntity[counter].entity == searchString){
+          return listOfEntity[counter].value;
+        }
+      }
+    }
+    return null;
+  },
+
   converse:function(sheet, arguments, functions, callback){
     return new Promise( async (resolve) => {
-      var resultArray = sheet.data;
-      var questions = sheet.data[0];
+      var resultArray = sheet.data,
+          questions = sheet.data[0];
       for(var counter = 0; counter < questions.length ; counter++){
+        var match = functions.getEntityMatch(arguments, questions[counter]);
         if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
           continue;
         }
-        else if(arguments && arguments[questions[counter]]){
-          resultArray = callback(resultArray, counter , arguments[questions[counter]]);
+        else if(match){
+          resultArray = callback(resultArray, counter , match);
         }
         else if( questions[counter] == 'Answer'){
           resolve(resultArray);
           break;
         }
         else{
-          var answer =  await functions.askQuestion("What is the "+ questions[counter] + "?\n");
+          var answer =  await functions.askQuestion(functions.constructQuestion(questions[counter]));
           resultArray = callback(resultArray, counter , answer);
         }
       }
@@ -63,6 +77,9 @@ module.exports = {
     return new Promise((resolve) => {
       rl.question(question, (name) => { resolve(name) })
     })
+  },
+  constructQuestion:function(string){
+    return "What is the "+ string.split('_').join(' ') + "?\n";
   },
 
   constructAnswer:function(array){

@@ -28,20 +28,23 @@ module.exports = {
   filter:function(twoDimentionArrayToBeFiltered, index, criteria){
     var newArray = [twoDimentionArrayToBeFiltered[0]];
     for( var counter = 1 ; counter < twoDimentionArrayToBeFiltered.length ; counter++ ){
-      if(twoDimentionArrayToBeFiltered[counter][index] === criteria){
+      if(twoDimentionArrayToBeFiltered[counter][index] == criteria){
         newArray.push(twoDimentionArrayToBeFiltered[counter]);
       }
     }
     return newArray;
   },
 
-  converse:function(sheet, functions, callback){
+  converse:function(sheet, arguments, functions, callback){
     return new Promise( async (resolve) => {
       var resultArray = sheet.data;
       var questions = sheet.data[0];
       for(var counter = 0; counter < questions.length ; counter++){
         if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
           continue;
+        }
+        else if(arguments && arguments[questions[counter]]){
+          resultArray = callback(resultArray, counter , arguments[questions[counter]]);
         }
         else if( questions[counter] == 'Answer'){
           resolve(resultArray);

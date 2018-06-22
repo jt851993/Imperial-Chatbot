@@ -10,7 +10,7 @@ var assistant = new watson.AssistantV1({
 });
 
 module.exports ={
-    getIntent:function(text) {
+    getResponse:function(text) {
       return new Promise((resolve) =>{
                       assistant.message({
                         workspace_id: process.env.WORKSPACE_ID,
@@ -25,7 +25,7 @@ module.exports ={
                               resolve("undefined");
                             }
                             else{
-                              resolve(JSON.parse(response.output.text[0]).type);
+                              resolve(JSON.parse(response.output.text[0]));
                             }
                           }
                       )});

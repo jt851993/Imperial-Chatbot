@@ -28,6 +28,9 @@ module.exports = {
   },
 
   filter:function(twoDimentionArrayToBeFiltered, index, criteria){
+    if(criteria.length==0){
+        criteria=undefined;
+    }
     var newArray = [twoDimentionArrayToBeFiltered[0]];
     for( var counter = 1 ; counter < twoDimentionArrayToBeFiltered.length ; counter++ ){
       if(twoDimentionArrayToBeFiltered[counter][index] == criteria){
@@ -91,12 +94,18 @@ module.exports = {
     for(var counter = 0 ; counter < firstRow.length; counter++){
       if(firstRow[counter] === 'Answer'){
         for(var counter2 = 1 ; counter2 < array.length; counter2++){
-          if(answer == ''){
+          if(array[counter2][counter] == undefined){
+            continue;
+          }
+          else if(answer == ''){
             answer = array[counter2][counter];
           }
           else{
             answer = answer + " or " + array[counter2][counter]
           }
+        }
+        if(answer == ''){
+            return "No answer found";
         }
         return answer;
       }

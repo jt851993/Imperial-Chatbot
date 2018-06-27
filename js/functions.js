@@ -33,8 +33,16 @@ module.exports = {
     }
     var newArray = [twoDimentionArrayToBeFiltered[0]];
     for( var counter = 1 ; counter < twoDimentionArrayToBeFiltered.length ; counter++ ){
-      if(twoDimentionArrayToBeFiltered[counter][index] == criteria){
+      var data = twoDimentionArrayToBeFiltered[counter][index];
+      if(criteria == undefined &&  data == criteria){
         newArray.push(twoDimentionArrayToBeFiltered[counter]);
+      }
+      else if( data != undefined && criteria != undefined){
+        var item = String(data);
+        var item2 = criteria.toString().toLowerCase().trim();
+        if( item && item.toLowerCase().trim() == item2){
+          newArray.push(twoDimentionArrayToBeFiltered[counter]);
+        }
       }
     }
     return newArray;

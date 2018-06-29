@@ -49,14 +49,20 @@ module.exports = {
   },
 
   getEntityMatch:function(listOfEntity, searchString){
+    var answer = null;
     if(listOfEntity && searchString){
       for(var counter = 0 ; counter < listOfEntity.length ; counter++ ){
         if(listOfEntity[counter].entity == searchString){
-          return listOfEntity[counter].value;
+          if(answer == null){
+            answer = listOfEntity[counter].value;
+          }
+          else{
+            return null;
+          }
         }
       }
     }
-    return null;
+    return answer;
   },
 
   converse:function(sheet, arguments, functions, callback){

@@ -144,13 +144,12 @@ module.exports = {
     return "What is the "+ string.split('_').join(' ') + "?\n";
   },
 
-  constructAnswer:function(data){
+  constructAnswer:function(array){
     var answer = '';
-        array = data.result,
         firstRow = array[0];
 
-    if(array.length == 1){
-      return "No answer found";
+    if(!array || array.length == 1){
+      return null;
     }
     for(var counter = 0 ; counter < firstRow.length; counter++){
       if(firstRow[counter] === 'Answer'){
@@ -166,7 +165,7 @@ module.exports = {
           }
         }
         if(answer == ''){
-            return "No answer found";
+            return null;
         }
         return answer;
       }

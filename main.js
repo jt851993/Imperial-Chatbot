@@ -8,18 +8,24 @@ async function main(){
   var userInput = await functions.askQuestion('Hello what is your question?\n');
   while (userInput != 'exit'){
     var response = await watson.getResponse(userInput),
-        sheet = functions.getSheet( xlsx.parse(process.env.EXCEL_PATH), response.intents );
+        data = functions.createKVPair( functions, response );
+        sheet = functions.getSheet( xlsx.parse(process.env.EXCEL_PATH), data.intents )
+
     if(!sheet){
-      console.log("I do not understand your questions, please rephrase.");
+      console.log("I do not have an answer to your questions, question has been logged.");
+      functions.writeToFile(process.env.SAVE_FOLDER,process.env.SAVE_FILE,data);
     }
     else{
-      var resultArray = await functions.converse(sheet, response.entities, functions, function(array, index, query){
+      data = await functions.converse(sheet, data, functions, function(array, index, query){
         if(!functions.isAllEmpty(array, index)){
           return functions.filter(array, index, query);
         }
         return array;
       });
-      var answer = functions.constructAnswer(resultArray);
+      var answer = functions.constructAnswer(data);
+      if(answer=="No answer found"){
+          functions.writeToFile('./dump','./dump/questions.csv',data);
+      }
       console.log(answer);
     }
     userInput = await functions.askQuestion('Anything Else? \n');

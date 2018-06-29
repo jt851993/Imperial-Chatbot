@@ -8,6 +8,23 @@ const rl = readline.createInterface({
 })
 
 module.exports = {
+  createKVPair:function(functions, response){
+    var data ={};
+    data.intents = response.intents;
+    data.input = response.input.text;
+    data.rawEntities = response.entities;
+
+    var formattedEntities = [];
+    for(var counter = 0 ; counter < response.entities.length ; counter++){
+      var entity = {};
+      entity.entity = response.entities[counter].entity;
+      entity.value = response.entities[counter].value;
+      formattedEntities.push(entity);
+    }
+    data.entities = formattedEntities;
+    return data;
+  },
+
   writeToFile:function(location,file,args){
     if (!fs.existsSync(location)){
       fs.mkdirSync(location);
@@ -23,7 +40,7 @@ module.exports = {
           return;
       }
       writer.pipe(fs.createWriteStream(file, {flags: 'a'}))
-      writer.write({hello: "world2", foo: "bar2", baz: "taco2", comments: ""})
+      writer.write({Question: args.input, Entities: JSON.stringify(args.entities), Intent:JSON.stringify(args.intents), Comments: ""})
       writer.end()
     });
   },
@@ -87,12 +104,12 @@ module.exports = {
     return answer;
   },
 
-  converse:function(sheet, arguments, functions, callback){
+  converse:function(sheet, data, functions, callback){
     return new Promise( async (resolve) => {
       var resultArray = sheet.data,
           questions = sheet.data[0];
       for(var counter = 0; counter < questions.length ; counter++){
-        var match = functions.getEntityMatch(arguments, questions[counter]);
+        var match = functions.getEntityMatch(data.rawEntities, questions[counter]);
         if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
           continue;
         }
@@ -100,15 +117,21 @@ module.exports = {
           resultArray = callback(resultArray, counter , match);
         }
         else if( questions[counter] == 'Answer'){
-          resolve(resultArray);
+          data.result = resultArray;
+          resolve(data);
           break;
         }
         else{
           var answer =  await functions.askQuestion(functions.constructQuestion(questions[counter]));
+          var entity = {};
+          entity.entity = questions[counter];
+          entity.value = answer;
+          data.entities.push(entity);
           resultArray = callback(resultArray, counter , answer);
         }
       }
-      resolve(resultArray);
+      data.result = resultArray;
+      resolve(data);
     })
   },
 
@@ -121,9 +144,11 @@ module.exports = {
     return "What is the "+ string.split('_').join(' ') + "?\n";
   },
 
-  constructAnswer:function(array){
-    var firstRow = array[0];
-        answer = '';
+  constructAnswer:function(data){
+    var answer = '';
+        array = data.result,
+        firstRow = array[0];
+
     if(array.length == 1){
       return "No answer found";
     }

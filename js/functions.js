@@ -1,4 +1,6 @@
 var readline = require('readline');
+var fs = require('fs');
+var csvWriter = require('csv-write-stream')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -6,6 +8,26 @@ const rl = readline.createInterface({
 })
 
 module.exports = {
+  writeToFile:function(location,file,args){
+    if (!fs.existsSync(location)){
+      fs.mkdirSync(location);
+    }
+    fs.stat(file, function(err, stat) {
+      var writer = null;
+      if(err == null) {
+          var writer = csvWriter({sendHeaders: false})
+      } else if(err.code == 'ENOENT') {
+          var writer = csvWriter()
+      } else {
+          console.log('Some other error: ', err.code);
+          return;
+      }
+      writer.pipe(fs.createWriteStream(file, {flags: 'a'}))
+      writer.write({hello: "world2", foo: "bar2", baz: "taco2", comments: ""})
+      writer.end()
+    });
+  },
+
   getSheet:function(sheetArray, intent){
     if(intent && intent[0]){
       for( var counter = 0 ; counter < sheetArray.length ; counter++){

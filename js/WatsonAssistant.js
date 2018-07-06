@@ -1,6 +1,5 @@
 var watson = require('watson-developer-cloud');
 var stringBundle = require('./StringBundle');
-var text_string = stringBundle.watson_text_text;
 module.exports ={
     getResponse:function(env, text) {
       return new Promise((resolve) =>{
@@ -11,7 +10,7 @@ module.exports ={
                       });
                       assistant.message({
                         workspace_id: process.env.WORKSPACE_ID,
-                        input: {text_string: text}
+                        input: {'text': text}
                       },
                       function(err, response)
                           {

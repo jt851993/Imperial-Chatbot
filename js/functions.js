@@ -1,6 +1,7 @@
 var readline = require('readline');
 var fs = require('fs');
-var csvWriter = require('csv-write-stream')
+var csvWriter = require('csv-write-stream');
+var stringBundle = require('./StringBundle');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -33,13 +34,13 @@ module.exports = {
       var writer = null;
       if(err == null) {
           var writer = csvWriter({sendHeaders: false})
-      } else if(err.code == 'ENOENT') {
+      } else if(err.code == stringBundle.error_code_ENOENT) {
           var writer = csvWriter()
       } else {
-          console.log('Some other error: ', err.code);
+          console.log(stringBundle.error_text, err.code);
           return;
       }
-      writer.pipe(fs.createWriteStream(file, {flags: 'a'}))
+      writer.pipe(fs.createWriteStream(file, {flags: stringBundle.csv_flag }))
       writer.write({Question: args.input, Entities: JSON.stringify(args.entities), Intent:JSON.stringify(args.intents), Comments: ""})
       writer.end()
     });
@@ -116,7 +117,7 @@ module.exports = {
         else if(match){
           resultArray = callback(resultArray, counter , match);
         }
-        else if( questions[counter] == 'Answer'){
+        else if( questions[counter] == stringBundle.answer_sheetname){
           data.result = resultArray;
           resolve(data);
           break;
@@ -141,7 +142,9 @@ module.exports = {
     })
   },
   constructQuestion:function(string){
-    return "What is the "+ string.split('_').join(' ') + "?\n";
+    return stringBundle.question_starter_text +
+          string.split(stringBundle.sheet_columnName_seperator).join(stringBundle.space_text) +
+          stringBundle.question_ender_text;
   },
 
   constructAnswer:function(array){
@@ -152,7 +155,7 @@ module.exports = {
       return null;
     }
     for(var counter = 0 ; counter < firstRow.length; counter++){
-      if(firstRow[counter] === 'Answer'){
+      if(firstRow[counter] === stringBundle.answer_sheetname){
         for(var counter2 = 1 ; counter2 < array.length; counter2++){
           if(array[counter2][counter] == undefined){
             continue;
@@ -161,7 +164,7 @@ module.exports = {
             answer = array[counter2][counter];
           }
           else{
-            answer = answer + " or " + array[counter2][counter]
+            answer = answer + stringBundle.or_text + array[counter2][counter]
           }
         }
         if(answer == ''){

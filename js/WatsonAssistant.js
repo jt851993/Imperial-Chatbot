@@ -1,20 +1,17 @@
-require('dotenv').config({silent: true});
-
 var watson = require('watson-developer-cloud');
-var functions = require('./js/functions');
-
-var assistant = new watson.AssistantV1({
-  username: process.env.ASSISTANT_USERNAME,
-  password: process.env.ASSISTANT_PASSWORD,
-  version: process.env.ASSISTANT_VERSION
-});
-
+var stringBundle = require('./StringBundle');
+var text_string = stringBundle.watson_text_text;
 module.exports ={
-    getResponse:function(text) {
+    getResponse:function(env, text) {
       return new Promise((resolve) =>{
+                      var assistant = new watson.AssistantV1({
+                        username: env.ASSISTANT_USERNAME,
+                        password: env.ASSISTANT_PASSWORD,
+                        version: env.ASSISTANT_VERSION
+                      });
                       assistant.message({
                         workspace_id: process.env.WORKSPACE_ID,
-                        input: {'text': text}
+                        input: {text_string: text}
                       },
                       function(err, response)
                           {

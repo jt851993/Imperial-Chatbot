@@ -1,15 +1,17 @@
 require('dotenv').config({silent: true});
 
-var watson = require('./WatsonAssistant');
+var watson = require('./js/WatsonAssistant');
 var functions = require('./js/functions');
 var xlsx = require('node-xlsx');
+var stringBundle = require('./js/StringBundle');
+var enviroment = process.env;
 
 async function main(){
-  var userInput = await functions.askQuestion('Hello what is your question?\n');
-  while ( userInput != 'exit' ){
-    var response = await watson.getResponse( userInput ),
+  var userInput = await functions.askQuestion( stringBundle.greeting_text );
+  while ( userInput != stringBundle.exit_text ){
+    var response = await watson.getResponse( enviroment , userInput ),
         data = functions.createKVPair( functions, response );
-        sheet = functions.getSheet( xlsx.parse(process.env.EXCEL_PATH), data.intents );
+        sheet = functions.getSheet( xlsx.parse( enviroment.EXCEL_PATH ), data.intents );
         answer = null;
 
     if( sheet ){
@@ -23,14 +25,14 @@ async function main(){
     }
 
     if(answer== null){
-      console.log("I do not have an answer to your questions, question has been logged.");
-      functions.writeToFile(process.env.SAVE_FOLDER,process.env.SAVE_FILE,data);
+      console.log(stringBundle.default_answer_text);
+      functions.writeToFile(enviroment.SAVE_FOLDER,enviroment.SAVE_FILE,data);
     }
     else{
       console.log(answer);
     }
 
-    userInput = await functions.askQuestion('Anything Else? \n');
+    userInput = await functions.askQuestion( stringBundle.anything_else_text );
   }
   process.exit();
 }

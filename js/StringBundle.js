@@ -12,7 +12,8 @@ var strings = {
   error_text: 'Some other error: ',
   csv_flag: 'a',
   error_code_ENOENT: 'ENOENT',
-  watson_text_text: 'text'
+  watson_text_text: 'text',
+  console_running_text: "Imperial Chatbot service running on port:"
 };
 
 module.exports = strings;

@@ -13,7 +13,6 @@ async function main(){
         data = functions.createKVPair( functions, response );
         sheet = functions.getSheet( xlsx.parse( enviroment.EXCEL_PATH ), data.intents );
         answer = null;
-
     if( sheet ){
       data = await functions.converse(sheet, data, functions, function(array, index, query){
         if(!functions.isAllEmpty(array, index)){

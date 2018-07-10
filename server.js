@@ -10,7 +10,7 @@ var enviroment = process.env;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-routes(app);
+routes(enviroment,app);
 
 var server = app.listen(enviroment.PORT_NUMBER, function () {
     console.log(stringBundle.console_running_text, server.address().port);

@@ -1,4 +1,6 @@
-var appRouter = function (app) {
+var converse = require('./converse');
+
+var appRouter = function (env,app) {
   app.get("/", function(req, res) {
     res.status(200).send("Welcome to our restful API");
   });
@@ -9,6 +11,13 @@ var appRouter = function (app) {
       lastName: "tan"
     });
     res.status(200).send(data);
+  });
+
+  app.post('/converse', async function(req, res) {
+    console.log("start");
+    var reply = await converse.getReply(env,req.body);
+    console.log("done");
+    res.send(reply);
   });
 }
 

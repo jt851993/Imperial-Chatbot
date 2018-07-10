@@ -11,9 +11,8 @@ const rl = readline.createInterface({
 module.exports = {
   createKVPair:function(functions, response){
     var data ={};
-    data.intents = response.intents;
+    data.intent = response.intents[0].intent;
     data.input = response.input.text;
-    data.rawEntities = response.entities;
 
     var formattedEntities = [];
     for(var counter = 0 ; counter < response.entities.length ; counter++){
@@ -47,9 +46,9 @@ module.exports = {
   },
 
   getSheet:function(sheetArray, intent){
-    if(intent && intent[0]){
+    if(intent){
       for( var counter = 0 ; counter < sheetArray.length ; counter++){
-        if(sheetArray[counter].name === intent[0].intent){
+        if(sheetArray[counter].name === intent){
           return sheetArray[counter];
         }
       }
@@ -103,6 +102,46 @@ module.exports = {
       }
     }
     return answer;
+  },
+
+  getAnswer:function(functions,sheet,data){
+    return new Promise(
+      async (resolve) => {
+          var questions = sheet.data[0],
+              resultArray = sheet.data;
+          for(var counter = 0; counter < questions.length ; counter++){
+            var match = functions.getEntityMatch(data.entities, questions[counter]);
+            if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
+              continue;
+            }
+            else if(match){
+              if(!functions.isAllEmpty(resultArray, counter)){
+                resultArray = functions.filter(resultArray, counter , match);
+              }
+            }
+            else if( questions[counter] == stringBundle.answer_sheetname){
+              var answer = functions.constructAnswer(resultArray);
+              var ret = {};
+              if(answer){
+                ret.output = answer;
+                resolve(data);
+              }
+              else{
+                resolve(null);
+              }
+              break;
+            }
+            else{
+              var question =  functions.constructQuestion(questions[counter]);
+              var ret = {};
+              ret.output = question;
+              data.getInputAs = questions[counter];
+              ret.data = data;
+              resolve(ret);
+            }
+          }
+      }
+    );
   },
 
   converse:function(sheet, data, functions, callback){

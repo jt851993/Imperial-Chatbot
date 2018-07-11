@@ -14,9 +14,7 @@ var appRouter = function (env,app) {
   });
 
   app.post('/converse', async function(req, res) {
-    console.log("start");
     var reply = await converse.getReply(env,req.body);
-    console.log("done");
     res.send(reply);
   });
 }

@@ -11,18 +11,26 @@ const rl = readline.createInterface({
 module.exports = {
   createKVPair:function(functions, response){
     var data ={};
-    data.intent = response.intents[0].intent;
+    if(response.intents && response.intents[0]){
+      data.intent = response.intents[0].intent;
+    }
+    else{
+      data.intent = null;
+    }
     data.input = response.input.text;
+    data.entities = functions.getEntitiesFromResponse(response);
+    return data;
+  },
 
+  getEntitiesFromResponse:function(res){
     var formattedEntities = [];
-    for(var counter = 0 ; counter < response.entities.length ; counter++){
+    for(var counter = 0 ; counter < res.entities.length ; counter++){
       var entity = {};
-      entity.entity = response.entities[counter].entity;
-      entity.value = response.entities[counter].value;
+      entity.entity = res.entities[counter].entity;
+      entity.value = res.entities[counter].value;
       formattedEntities.push(entity);
     }
-    data.entities = formattedEntities;
-    return data;
+    return formattedEntities;
   },
 
   writeToFile:function(location,file,args){
@@ -124,7 +132,7 @@ module.exports = {
               var ret = {};
               if(answer){
                 ret.output = answer;
-                resolve(data);
+                resolve(ret);
               }
               else{
                 resolve(null);
@@ -140,6 +148,7 @@ module.exports = {
               resolve(ret);
             }
           }
+          resolve(null);
       }
     );
   },

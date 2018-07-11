@@ -1,12 +1,6 @@
-var readline = require('readline');
 var fs = require('fs');
 var csvWriter = require('csv-write-stream');
 var stringBundle = require('./StringBundle');
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
 
 module.exports = {
   createKVPair:function(functions, response){
@@ -48,7 +42,7 @@ module.exports = {
           return;
       }
       writer.pipe(fs.createWriteStream(file, {flags: stringBundle.csv_flag }))
-      writer.write({Question: args.input, Entities: JSON.stringify(args.entities), Intent:JSON.stringify(args.intents), Comments: ""})
+      writer.write({Question: args.input, Entities: JSON.stringify(args.entities), Intent:JSON.stringify(args.intent), Comments: ""})
       writer.end()
     });
   },
@@ -115,11 +109,11 @@ module.exports = {
   getAnswer:function(functions,sheet,data){
     return new Promise(
       async (resolve) => {
-          var questions = sheet.data[0],
+          var sheetEntities = sheet.data[0],
               resultArray = sheet.data;
-          for(var counter = 0; counter < questions.length ; counter++){
-            var match = functions.getEntityMatch(data.entities, questions[counter]);
-            if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
+          for(var counter = 0; counter < sheetEntities.length ; counter++){
+            var match = functions.getEntityMatch(data.entities, sheetEntities[counter]);
+            if(!sheetEntities[counter] || functions.isAllEmpty(resultArray, counter) ){
               continue;
             }
             else if(match){
@@ -127,23 +121,18 @@ module.exports = {
                 resultArray = functions.filter(resultArray, counter , match);
               }
             }
-            else if( questions[counter] == stringBundle.answer_sheetname){
+            else if( sheetEntities[counter] == stringBundle.answer_sheetname){
               var answer = functions.constructAnswer(resultArray);
-              var ret = {};
               if(answer){
-                ret.output = answer;
+                var ret = {};
+                ret.output = answer + '\n' + stringBundle.anything_else_text;
                 resolve(ret);
               }
-              else{
-                resolve(null);
-              }
-              break;
             }
             else{
-              var question =  functions.constructQuestion(questions[counter]);
               var ret = {};
-              ret.output = question;
-              data.getInputAs = questions[counter];
+              ret.output = functions.constructQuestion(sheetEntities[counter]);
+              data.getInputAs = sheetEntities[counter];
               ret.data = data;
               resolve(ret);
             }
@@ -153,42 +142,6 @@ module.exports = {
     );
   },
 
-  converse:function(sheet, data, functions, callback){
-    return new Promise( async (resolve) => {
-      var resultArray = sheet.data,
-          questions = sheet.data[0];
-      for(var counter = 0; counter < questions.length ; counter++){
-        var match = functions.getEntityMatch(data.rawEntities, questions[counter]);
-        if(!questions[counter] || functions.isAllEmpty(resultArray, counter) ){
-          continue;
-        }
-        else if(match){
-          resultArray = callback(resultArray, counter , match);
-        }
-        else if( questions[counter] == stringBundle.answer_sheetname){
-          data.result = resultArray;
-          resolve(data);
-          break;
-        }
-        else{
-          var answer =  await functions.askQuestion(functions.constructQuestion(questions[counter]));
-          var entity = {};
-          entity.entity = questions[counter];
-          entity.value = answer;
-          data.entities.push(entity);
-          resultArray = callback(resultArray, counter , answer);
-        }
-      }
-      data.result = resultArray;
-      resolve(data);
-    })
-  },
-
-  askQuestion:function(question) {
-    return new Promise((resolve) => {
-      rl.question(question, (name) => { resolve(name) })
-    })
-  },
   constructQuestion:function(string){
     return stringBundle.question_starter_text +
           string.split(stringBundle.sheet_columnName_seperator).join(stringBundle.space_text) +

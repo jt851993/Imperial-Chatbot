@@ -1,72 +1,61 @@
 var stringBundle = require('./StringBundle');
 var functions = require('./functions');
 var xlsx = require('node-xlsx');
+var watson = require('./WatsonAssistant');
 
 var converse = {
   getReply:async function(env,req){
-        var ret = {};
         if( !req.userInput ){
+          var ret = {};
           ret.output = stringBundle.greeting_text;
           return ret;
         }
         else if ( req.userInput && !req.data ){
-          var watson = require('./WatsonAssistant');
-              response = await watson.getResponse( env , req.userInput )
+          var response = await watson.getResponse( env , req.userInput )
               keyValue = functions.createKVPair( functions, response );
 
-          if(!keyValue.intent){
-            functions.writeToFile(env.SAVE_FOLDER,env.SAVE_FILE,keyValue);
-            ret.output = stringBundle.default_answer_text;
-            return ret;
-          }
-
-          var sheet = functions.getSheet( xlsx.parse( env.EXCEL_PATH ), keyValue.intent );
-          if(!sheet){
-            functions.writeToFile(env.SAVE_FOLDER,env.SAVE_FILE,keyValue);
-            ret.output = stringBundle.default_answer_text;
-            return ret;
-          }
-
-          var answer = await functions.getAnswer(functions,sheet, keyValue);
-          if(!answer){
-            functions.writeToFile(env.SAVE_FOLDER,env.SAVE_FILE,keyValue);
-            ret.output = stringBundle.default_answer_text;
-            return ret;
-          }
-          return answer;
+          return formatAnswer(env, keyValue.intent, keyValue);
         }
         else{
-          var watson = require('./WatsonAssistant'),
-              response = await watson.getResponse( env , req.userInput );
+          var response = await watson.getResponse( env , req.userInput );
               entities = functions.getEntitiesFromResponse(response);
-              matchedEntity = functions.getEntityMatch(entities,req.data.getInputAs);
+              entity = {};
 
-          var entity = {};
           entity.entity = req.data.getInputAs;
-          if(matchedEntity){
-            entity.value = matchedEntity;
-          }
-          else{
-            entity.value = req.userInput;
-          }
+          entity.value = getMatchedEntity(req);
           req.data.entities.push(entity);
 
-          var sheet = functions.getSheet( xlsx.parse( env.EXCEL_PATH ), req.data.intent );
-          if(!sheet){
-            functions.writeToFile(env.SAVE_FOLDER,env.SAVE_FILE,req.data);
-            ret.output = stringBundle.default_answer_text;
-            return ret;
-          }
-
-          var answer = await functions.getAnswer(functions,sheet, req.data);
-          if(!answer){
-            functions.writeToFile(env.SAVE_FOLDER,env.SAVE_FILE,req.data);
-            ret.output = stringBundle.default_answer_text;
-            return ret;
-          }
-          return answer;
+          return formatAnswer(env, req.data.intent, req.data);
         }
       }
     }
+
+function getMatchedEntity(req){
+  var matchedEntity = functions.getEntityMatch(entities,req.data.getInputAs);
+  if(matchedEntity){
+    return matchedEntity;
+  }
+  return req.userInput;
+}
+
+async function formatAnswer(env,intent,data){
+    var sheet = functions.getSheet( xlsx.parse( env.EXCEL_PATH ), intent );
+    if(!sheet){
+      return saveToFile(env,data);
+    }
+    var answer = await functions.getAnswer(functions, sheet , data);
+    if(!answer){
+      return saveToFile(env,data);
+    }
+
+    return answer;
+}
+
+function saveToFile(env, data){
+  var ret ={};
+  functions.writeToFile(env.SAVE_FOLDER,env.SAVE_FILE,data);
+  ret.output = stringBundle.default_answer_text + '\n' + stringBundle.anything_else_text;
+  return ret;
+}
 
 module.exports = converse;

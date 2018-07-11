@@ -128,6 +128,7 @@ module.exports = {
                 ret.output = answer + '\n' + stringBundle.anything_else_text;
                 resolve(ret);
               }
+              break;
             }
             else{
               var ret = {};
@@ -135,6 +136,7 @@ module.exports = {
               data.getInputAs = sheetEntities[counter];
               ret.data = data;
               resolve(ret);
+              break;
             }
           }
           resolve(null);

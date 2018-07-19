@@ -116,10 +116,8 @@ module.exports = {
             if(!sheetEntities[counter] || functions.isAllEmpty(resultArray, counter) ){
               continue;
             }
-            else if(match){
-              if(!functions.isAllEmpty(resultArray, counter)){
-                resultArray = functions.filter(resultArray, counter , match);
-              }
+            else if(match && !functions.isAllEmpty(resultArray, counter)){
+              resultArray = functions.filter(resultArray, counter , match);
             }
             else if( sheetEntities[counter] == stringBundle.answer_sheetname){
               var answer = functions.constructAnswer(resultArray);
